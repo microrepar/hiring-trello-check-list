@@ -1,0 +1,81 @@
+pylintrc:
+    commands:
+        $ pylint --generate-rcfile > .pylintrc
+    config_file_name:
+        - .pylintrc
+    content:
+        generate command above
+
+
+pre-commit:
+    commands:
+        $ pip install pre-commit
+        execute next command after created config file
+        $ pre-commit install
+        $ pre-commit autoupdate   # Execute after install when need to change config content.
+    
+    config_file_name:
+        - .pre-commit-config.yaml
+        content:
+        ```
+        repos:
+            - repo: local
+                hooks:
+                - id: pylint
+                    name: pylint
+                    entry: pylint
+                    language: system
+                    types: [python]
+                    args:
+                    [
+                        "-rn", # Only display messages
+                        "-sn", # Don't display the score
+                        "--rcfile=.pylintrc", # Link to your config file
+                        "--load-plugins=pylint.extensions.docparams", # Load an extension
+                    ]
+            - repo: local
+                hooks:
+                - id: requirements
+                    name: requirements
+                    entry: bash -c 'venv/bin/pip3 freeze > requirements.txt; git add requirements.txt'
+                    # cmd /C 'C:\Users\codigo100cera\Envs\geo-data-viz-venv\Scripts\pip.exe freeze > requirements.txt && git add requirements.txt'
+                    language: system
+                    pass_filenames: false
+                    stages: [commit]
+        ```
+
+lib: sqlcodegen -> depends -> psycopg2 lib
+    - $ pip install sqlacodegem
+    - $ sqlacodegem [sqlalchemy.url] --schema [schema_name] > [outputfile.py]
+            URI_POSTGRES -> f"{DB_DIALECT}://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_DATABASE}"
+
+lib: alembic -> depends -> psycopg2 lib
+    site: https://medium.com/@johnidouglasmarangon/using-migrations-in-python-sqlalchemy-with-alembic-docker-solution-bd79b219d6a
+    - $ pip install alembic
+    - $ alembic init [alembic]
+        Define alembic.ini: sqlalchemy.url = postgresql+psycopg2://myuser:mypassword@0.0.0.0:5432/mydb
+    - $ alembic revision --autogenerate -m "Create a baseline migrations"
+    - $ alembic upgrade head
+    - $ alembic revision -m "Create trigger on students table"
+    - $ alembic revision -m "Fill empty students note"
+    Others commands:
+        Display the current revision for a database : alembic current.
+        View migrations history                     : alembic history --verbose.
+        Revert all migrations                       : alembic downgrade base.
+        Revert migrations one by one                : alembic downgrade -1.
+        Apply all migrations                        : alembic upgrade head.
+        Apply migrations one by one                 : alembic upgrade +1.
+        Display all raw SQL                         : alembic upgrade head --sql.
+        Reset the database                          : alembic downgrade base && alembic upgrade head.
+
+    Schema defination:
+        Option1 in model.py:
+            from sqlalchemy import MetaData
+            from sqlalchemy.ext.declarative import declarative_base
+            Base = declarative_base(metadata=MetaData(schema="myschema"))
+        Option2 in class:
+            class Student(Base):  
+                __tablename__ = 'students'
+                __table_args__ = {'schema' : 'myschema'}
+                
+                ...

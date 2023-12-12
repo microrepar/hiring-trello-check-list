@@ -1,0 +1,4 @@
+*__pycache__*
+pickle_data/
+redis_data/
+secrets.toml
