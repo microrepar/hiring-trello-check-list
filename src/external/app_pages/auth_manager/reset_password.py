@@ -35,8 +35,8 @@ def reset_password_page(authenticator, credentials, username, placeholder_msg):
             messages = resp["messages"]
             entities = resp["entities"]
 
-            if messages:
-                raise Exception("\n\n".join(messages))
+            if 'error' in messages:
+                raise Exception("\n\n".join(messages['error']))
             #############################################################
 
             st.success(f"User password has been updated successfully")

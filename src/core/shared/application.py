@@ -97,8 +97,19 @@ class Result:
         return len(self._error_msg)
     
     def to_dict(self):
+        messages = {}
+
+        if self.error_msg:
+            messages.update({'error': self.error_msg})
+        if self.warning_msg:
+            messages.update({'warning': self.warning_msg})
+        if self.info_msg:
+            messages.update({'info': self.info_msg})
+        if self.success_msg:
+            messages.update({'success': self.success_msg})
+
         return {
-            'messages': self._error_msg,
+            'messages': messages,
             'entities': self._entities,
             'objects': self._objects,
         }

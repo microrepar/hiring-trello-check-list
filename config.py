@@ -24,6 +24,9 @@ class Config:
         REDIS_PASSWORD     = st.secrets.get('REDIS_PASSWORD')
 
         DB_FRAMEWORK = st.secrets.get('DB_FRAMEWORK')
+        
+        KEY_TRELLO = st.secrets.get('KEY_TRELLO')
+        TOKEN_TRELLO = st.secrets.get('TOKEN_TRELLO')
 
     else:
         DATABASE_URL = os.getenv('DATABASE_URL')
@@ -40,6 +43,9 @@ class Config:
         REDIS_PASSWORD     = os.getenv('REDIS_PASSWORD')
 
         DB_FRAMEWORK = os.getenv('DB_FRAMEWORK')
+
+        KEY_TRELLO = st.secrets.get('KEY_TRELLO')
+        TOKEN_TRELLO = st.secrets.get('TOKEN_TRELLO')
 
     if DATABASE_URL is None:
         if DB_DIALECT and DB_DIALECT in 'postgresql mysql':

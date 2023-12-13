@@ -13,7 +13,8 @@ candidate_columns = ['nome', 'insc', 'classif', 'cargo', 'convocacao', 'prazo', 
 candidate_types   = [ str,    str,    str,      str,  'datetime64[ns]', 'datetime64[ns]', str, str]
 
 
-def candidate_list_page(username, user_dict):
+def candidate_list_page(username, user_dict, placeholder_messages):
+
     with contextlib.suppress(FileExistsError):
         Path(f'pickle_data').mkdir()
     
@@ -47,14 +48,14 @@ def candidate_list_page(username, user_dict):
     df = pd.concat([df, empty_df], ignore_index=True)
 
     editor_config = {
-        'nome': st.column_config.TextColumn('Nome Completo', required=True),
-        'insc': st.column_config.TextColumn('Inscrição', required=True),
-        'classif': st.column_config.TextColumn('Classificação', required=True),
-        'cargo': st.column_config.TextColumn('Cargo', required=True),
+        'nome': st.column_config.TextColumn('Nome Completo', required=True, default=''),
+        'insc': st.column_config.TextColumn('Inscrição', required=True, default=''),
+        'classif': st.column_config.TextColumn('Classificação', required=True, default=''),
+        'cargo': st.column_config.TextColumn('Cargo', required=True, default=''),
         'convocacao': st.column_config.DateColumn('Data Convocação', required=True, format='DD/MM/YYYY'),
         'prazo': st.column_config.DateColumn('Prazo Final', required=True, format='DD/MM/YYYY'),
-        'edital': st.column_config.TextColumn('Edital', required=True),
-        'secretaria': st.column_config.TextColumn('Secretaria', required=True),
+        'edital': st.column_config.TextColumn('Edital', required=True, default=''),
+        'secretaria': st.column_config.TextColumn('Secretaria', required=True, default=''),
     }
     
     placeholder_data_editor = st.empty()
@@ -68,7 +69,6 @@ def candidate_list_page(username, user_dict):
         edited_df = placeholder_data_editor.data_editor(df, 
                                                     num_rows="dynamic", 
                                                     column_config=editor_config,
-                                                    # hide_index=True,
                                                     use_container_width=True,
                                                     key=editor_key)                
     else:
@@ -76,7 +76,6 @@ def candidate_list_page(username, user_dict):
         edited_df = placeholder_data_editor.data_editor(df, 
                                                     num_rows="dynamic", 
                                                     column_config=editor_config,
-                                                    # hide_index=True,
                                                     use_container_width=True,
                                                     key=editor_key)
         
@@ -99,13 +98,76 @@ def candidate_list_page(username, user_dict):
         st.session_state[editor_key]['deleted_rows'] = []
         st.rerun()
 
+    
     # st.write(st.session_state[editor_key])
-
+    # st.write(list(edited_df.T.to_dict().values()))
+    
+    placeholder_btn_criar_checklist = st.empty()
+    
     if not edited_df.empty:
-        if st.button('Criar Checklist'):
-            df = pd.DataFrame(columns=candidate_columns)
-            df = df.astype(dict(zip(candidate_columns, candidate_types)))
-            df.to_pickle(candidates_file)
-            st.rerun()
+        if placeholder_btn_criar_checklist.button('Criar Checklist'):
+
+            df_copy = edited_df.copy()
+            df_copy['convocacao'] = df_copy['convocacao'].astype(str)
+            df_copy['prazo'] = df_copy['prazo'].astype(str)
+
+            cols_to_rename = {
+                "nome"       : "candidate_complete_name",
+                "insc"       : "candidate_enrollment",
+                "classif"    : "candidate_classification",
+                "cargo"      : "candidate_office",
+                "convocacao" : "candidate_convocation_date",
+                "prazo"      : "candidate_deadline",
+                "edital"     : "candidate_notice",
+                "secretaria" : "candidate_department",
+            }
+
+            df_copy.rename(columns=cols_to_rename, inplace=True)
+            df_copy.fillna('', inplace=True)
+            # st.write(list(df_copy.T.to_dict().values()))
+           
+            #############################################################
+            ### REGISTRY TRELLO CHECKLIST###
+            #############################################################
+            request = {
+                'resource'   : '/convocation/create_checklist',
+                'convocation_created_by' : username,
+                'convocation_candidates' : list(df_copy.T.to_dict().values()),
+            }
+            #############################################################
+            controller = Controller()
+            resp = controller(request=request)
+            messages = resp.get('messages')
+            entities = resp.get('entities')
+            #############################################################
+
+            if 'error' in messages:
+                placeholder_messages.error('\n  - '.join(messages['error']), icon='🚨')
+                st.error('\n  - '.join(messages['error']), icon='🚨')
+            if 'info' in messages:
+                placeholder_messages.info('\n  - '.join(messages['info']), icon='⚠️')
+                st.info('\n  - '.join(messages['info']), icon='⚠️')
+            if 'warning' in messages:
+                placeholder_messages.info('\n  - '.join(messages['warning']), icon='ℹ️')
+                st.info('\n  - '.join(messages['warning']), icon='ℹ️')
+            if 'success' in messages:
+                placeholder_messages.info('\n  - '.join(messages['success']), icon='✅')
+                st.info('\n  - '.join(messages['success']), icon='✅')
+                
+                if entities:
+                    convocation = entities[-1]
+                    df = pd.concat([pd.DataFrame(c.data_to_dataframe()) for c in convocation.candidates])
+                else:                        
+                    # Apaga o registros após serem inseridos
+                    df = pd.DataFrame(columns=candidate_columns)
+                    df = df.astype(dict(zip(candidate_columns, candidate_types)))
+                
+                df.to_pickle(candidates_file)
+                placeholder_btn_criar_checklist.button('Concluir')
+            #############################################################
+
+
+
+
 
 

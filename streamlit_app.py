@@ -15,10 +15,10 @@ from src.external.app_pages.candidate_list_page import candidate_list_page
 
 st.set_page_config(layout='wide')
 
-placeholder_msg = st.empty()
+placeholder_messages = st.empty()
 
 # -------------------------Authentication-------------------------
-name, authentication_status, username, authenticator, credentials, user_dict = streamlit_auth(placeholder_msg)
+name, authentication_status, username, authenticator, credentials, user_dict = streamlit_auth(placeholder_messages)
 
 if authentication_status == False:
     st.error("Username/password is incorrect")
@@ -46,7 +46,7 @@ if authentication_status:
         )
     
     add_page_title(layout='wide')
-    candidate_list_page(username, user_dict)
+    candidate_list_page(username, user_dict, placeholder_messages)
 
 else:    
     show_pages([Page("streamlit_app.py", "CHECKLIST TRELLO", "🗂️"),])

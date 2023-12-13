@@ -55,7 +55,11 @@ class GenericViewHelper(AbstractViewHelper):
                         elif type(param_value) == str:
                             kwargs[name] = string_to_date(param_value)
                     else:
-                        kwargs[name] = param.annotation(param_value)
+                        if param_value is None: continue
+                        try:
+                            kwargs[name] = param.annotation(param_value)
+                        except:
+                            pass
                 
                 elif getattr(param.annotation, '__base__', None) == Entity:
                     inner_class_param = [param.annotation]

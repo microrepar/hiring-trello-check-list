@@ -45,8 +45,8 @@ def create_user(*args):
     messages = resp['messages']
     entities = resp['entities']
 
-    if messages:
-        raise Exception('\n\n'.join(messages))
+    if 'error' in messages:
+        raise Exception('\n\n'.join(messages['error']))
 
     print(f'User {username} created successfully.')
     #############################################################

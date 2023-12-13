@@ -31,8 +31,8 @@ def signup_page(authenticator, credentials, username):
             messages = resp['messages']
             entities = resp['entities']
 
-            if messages:
-                raise Exception('\n\n'.join(messages))
+            if 'error' in messages:
+                raise Exception('\n\n'.join(messages['error']))
             #############################################################
 
             st.success('User registered successfully')       
@@ -57,8 +57,8 @@ def signup_page(authenticator, credentials, username):
     #############################################################
     # st.write(entities)
 
-    if messages:
-        st.error('\n  -'.join(messages), icon='🚨')
+    if 'error' in messages:
+        st.error('\n  -'.join(messages['error']), icon='🚨')
     elif entities:
         df = pd.concat([pd.DataFrame(u.data_to_dataframe()) for u in entities], ignore_index=True)
         placeholder_data_editor = st.empty()
@@ -181,8 +181,8 @@ def signup_page(authenticator, credentials, username):
                     messages = resp['messages']
                     entities = resp['entities']
 
-                    if messages:
-                        error_messages += messages
+                    if 'error' in messages:
+                        error_messages += messages['error']
                     else:
                         username_list.append(user_username)
                     #############################################################
@@ -256,8 +256,8 @@ def signup_page(authenticator, credentials, username):
                         messages = resp['messages']
                         entities = resp['entities']
 
-                        if messages:
-                            error_messages += messages
+                        if 'error' in messages:
+                            error_messages += messages['error']
                         else:
                             username_list.append(user_username)
 
@@ -316,8 +316,8 @@ def signup_page(authenticator, credentials, username):
         entities = resp['entities']
         #############################################################
 
-        if messages:
-            st.error('\n\n'.join(messages), icon='🚨')
+        if 'error' in messages:
+            st.error('\n\n'.join(messages['error']), icon='🚨')
 
         elif entities:
             df = pd.concat([pd.DataFrame(u.data_to_dataframe()) for u in entities], ignore_index=True)
@@ -386,8 +386,8 @@ def signup_page(authenticator, credentials, username):
                     messages = resp['messages']
                     entities = resp['entities']
 
-                    if messages:
-                        error_messages += messages
+                    if 'error' in messages:
+                        error_messages += messages['error']
                     else:
                         username_list.append(user_username)
                     #############################################################
