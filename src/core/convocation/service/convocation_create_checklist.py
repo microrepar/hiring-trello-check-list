@@ -16,7 +16,6 @@ class ConvocationCreateChecklist(UseCase):
     def execute(self, entity: Convocation) -> Result:
         result = Result()
 
-        print('>>>>>>>>>>>>>>>>>', entity.candidates)
         result.error_msg = entity.validate_data()
         if result.qty_msg():
             return result
@@ -31,20 +30,26 @@ class ConvocationCreateChecklist(UseCase):
             try:
                 json_response = self.repository.registry(candidate)
                 candidate.card_id = json_response['id']
+                self.repository.update(candidate)
+
             except Exception as error:
-                result.warning_msg = (
-                    f'ConvocationCreateChecklistWarning: candidate name "{candidate.complete_name}" {error}')
+                result.warning_msg = (f'ConvocationCreateChecklistWarning: candidate name "{candidate.complete_name}" {error}')
                 candidate_checklist_error_list.append(candidate)
+                self.repository.remove(candidate)
                 continue
-            else:
-                contador += 1                
             
             try:
                 self.repository.insert_label(candidate)
+
             except Exception as error:
+                candidate_checklist_error_list.append(candidate)
                 result.warning_msg = (f'ConvocationCreateChecklistWarnning: '
                                       f'ocorreu um erro ao inserir a label {candidate.enrollment} '
                                       f'para o edital "{candidate.enrollment}" - {error}')
+                self.repository.remove(candidate)
+            else:
+                contador += 1                
+
         if contador > 0:
             result.success_msg = f'Foram criados {contador} checklist(s) no Trello.'
         

@@ -13,7 +13,17 @@ candidate_columns = ['nome', 'insc', 'classif', 'cargo', 'convocacao', 'prazo', 
 candidate_types   = [ str,    str,    str,      str,  'datetime64[ns]', 'datetime64[ns]', str, str]
 
 
+def on_click_flag_reset():
+    st.session_state.flag_reset = not st.session_state.flag_reset
+
+
+
+
+
+
 def candidate_list_page(username, user_dict, placeholder_messages):
+    if 'flag_reset' not in st.session_state:
+        st.session_state.flag_reset = False
 
     with contextlib.suppress(FileExistsError):
         Path(f'pickle_data').mkdir()
@@ -30,7 +40,11 @@ def candidate_list_page(username, user_dict, placeholder_messages):
         df.to_pickle(candidates_file)
 
     col1, *cols = st.columns(5)
-    qtd_convocados = col1.number_input('Quantidade de convocados:', value=1, format='%d', min_value=1)
+    qtd_convocados = col1.number_input('Quantidade de convocados:', 
+                                       value=1, 
+                                       format='%d', 
+                                       on_change=on_click_flag_reset, 
+                                       min_value=1)
 
     df = pd.read_pickle(candidates_file)
 
@@ -40,12 +54,11 @@ def candidate_list_page(username, user_dict, placeholder_messages):
         qtd_convocados = 0
     else:
         qtd_convocados = qtd_convocados - qtd_inseridos
+        # Criando um DataFrame com linhas vazias
+        empty_df = pd.DataFrame([{} for _ in range(qtd_convocados)])
 
-    # Criando um DataFrame com linhas vazias
-    empty_df = pd.DataFrame([{} for _ in range(qtd_convocados)])
-
-    # Concatenando o DataFrame vazio ao DataFrame original
-    df = pd.concat([df, empty_df], ignore_index=True)
+        # Concatenando o DataFrame vazio ao DataFrame original
+        df = pd.concat([df, empty_df], ignore_index=True)
 
     editor_config = {
         'nome': st.column_config.TextColumn('Nome Completo', required=True, default=''),
@@ -59,9 +72,6 @@ def candidate_list_page(username, user_dict, placeholder_messages):
     }
     
     placeholder_data_editor = st.empty()
-
-    if 'flag_reset' not in st.session_state:
-        st.session_state.flag_reset = False
 
 
     if st.session_state.flag_reset:
@@ -144,6 +154,7 @@ def candidate_list_page(username, user_dict, placeholder_messages):
             if 'error' in messages:
                 placeholder_messages.error('\n  - '.join(messages['error']), icon='🚨')
                 st.error('\n  - '.join(messages['error']), icon='🚨')
+                placeholder_btn_criar_checklist.button('Reset', on_click=on_click_flag_reset)
             if 'info' in messages:
                 placeholder_messages.info('\n  - '.join(messages['info']), icon='⚠️')
                 st.info('\n  - '.join(messages['info']), icon='⚠️')
@@ -163,7 +174,7 @@ def candidate_list_page(username, user_dict, placeholder_messages):
                     df = df.astype(dict(zip(candidate_columns, candidate_types)))
                 
                 df.to_pickle(candidates_file)
-                placeholder_btn_criar_checklist.button('Concluir')
+                placeholder_btn_criar_checklist.button('Concluir', on_click=on_click_flag_reset)
             #############################################################
 
 
