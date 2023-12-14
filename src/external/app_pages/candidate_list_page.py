@@ -17,10 +17,6 @@ def on_click_flag_reset():
     st.session_state.flag_reset = not st.session_state.flag_reset
 
 
-
-
-
-
 def candidate_list_page(username, user_dict, placeholder_messages):
     if 'flag_reset' not in st.session_state:
         st.session_state.flag_reset = False
@@ -40,7 +36,7 @@ def candidate_list_page(username, user_dict, placeholder_messages):
         df.to_pickle(candidates_file)
 
     col1, *cols = st.columns(5)
-    qtd_convocados = col1.number_input('Quantidade de convocados:', 
+    qtd_convocados = col1.number_input('Quantidade:', 
                                        value=1, 
                                        format='%d', 
                                        on_change=on_click_flag_reset, 
