@@ -18,6 +18,40 @@ def on_click_flag_reset():
 
 
 def candidate_list_page(username, user_dict, placeholder_messages):
+
+    #############################################################
+    ### REGISTRY TRELLO CHECKLIST###
+    #############################################################
+    request = {
+        'resource'   : '/convocation/get_edital_label_list',
+    }
+    #############################################################
+    controller = Controller()
+    resp = controller(request=request)
+    messages = resp.get('messages')
+
+    edital_dict = {}
+    if resp.get('objects'):
+        edital_dict = resp.get('objects')[-1]
+    
+    label_list = [' '] + list(edital_dict)
+    #############################################################
+    if 'error' in messages:
+        placeholder_messages.error('\n  - '.join(messages['error']), icon='🚨')
+        st.error('\n  - '.join(messages['error']), icon='🚨')
+        placeholder_btn_criar_checklist.button('Reset', on_click=on_click_flag_reset)
+    if 'info' in messages:
+        placeholder_messages.info('\n  - '.join(messages['info']), icon='⚠️')
+        st.info('\n  - '.join(messages['info']), icon='⚠️')
+    if 'warning' in messages:
+        placeholder_messages.info('\n  - '.join(messages['warning']), icon='ℹ️')
+        st.warning('\n  - '.join(messages['warning']), icon='ℹ️')
+    if 'success' in messages:
+        placeholder_messages.info('\n  - '.join(messages['success']), icon='✅')
+        st.success('\n  - '.join(messages['success']), icon='✅')
+    #############################################################
+    
+
     if 'flag_reset' not in st.session_state:
         st.session_state.flag_reset = False
 
@@ -44,7 +78,6 @@ def candidate_list_page(username, user_dict, placeholder_messages):
 
     df = pd.read_pickle(candidates_file)
 
-
     qtd_inseridos = df.shape[0]
     if qtd_inseridos >= qtd_convocados:
         qtd_convocados = 0
@@ -55,6 +88,7 @@ def candidate_list_page(username, user_dict, placeholder_messages):
 
         # Concatenando o DataFrame vazio ao DataFrame original
         df = pd.concat([df, empty_df], ignore_index=True)
+        df.fillna('', inplace=True)
 
     editor_config = {
         'nome': st.column_config.TextColumn('Nome Completo', required=True, default=''),
@@ -63,7 +97,7 @@ def candidate_list_page(username, user_dict, placeholder_messages):
         'cargo': st.column_config.TextColumn('Cargo', required=True, default=''),
         'convocacao': st.column_config.DateColumn('Data Convocação', required=True, format='DD/MM/YYYY'),
         'prazo': st.column_config.DateColumn('Prazo Final', required=True, format='DD/MM/YYYY'),
-        'edital': st.column_config.TextColumn('Edital', required=True, default=''),
+        'edital': st.column_config.SelectboxColumn('Edital', options=label_list, required=True),
         'secretaria': st.column_config.TextColumn('Secretaria', required=True, default=''),
     }
     
@@ -114,6 +148,7 @@ def candidate_list_page(username, user_dict, placeholder_messages):
         if placeholder_btn_criar_checklist.button('Criar Checklist'):
 
             df_copy = edited_df.copy()
+            df_copy['edital'] = df_copy['edital'].replace(edital_dict)
             df_copy['convocacao'] = df_copy['convocacao'].astype(str)
             df_copy['prazo'] = df_copy['prazo'].astype(str)
 
@@ -156,10 +191,10 @@ def candidate_list_page(username, user_dict, placeholder_messages):
                 st.info('\n  - '.join(messages['info']), icon='⚠️')
             if 'warning' in messages:
                 placeholder_messages.info('\n  - '.join(messages['warning']), icon='ℹ️')
-                st.info('\n  - '.join(messages['warning']), icon='ℹ️')
+                st.warning('\n  - '.join(messages['warning']), icon='ℹ️')
             if 'success' in messages:
                 placeholder_messages.info('\n  - '.join(messages['success']), icon='✅')
-                st.info('\n  - '.join(messages['success']), icon='✅')
+                st.success('\n  - '.join(messages['success']), icon='✅')
                 
                 if entities:
                     convocation = entities[-1]
@@ -172,9 +207,3 @@ def candidate_list_page(username, user_dict, placeholder_messages):
                 df.to_pickle(candidates_file)
                 placeholder_btn_criar_checklist.button('Concluir', on_click=on_click_flag_reset)
             #############################################################
-
-
-
-
-
-
