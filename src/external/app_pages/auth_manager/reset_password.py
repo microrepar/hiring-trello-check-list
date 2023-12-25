@@ -31,9 +31,16 @@ def reset_password_page(authenticator, credentials, username, placeholder_msg):
             controller = Controller()
             resp = controller(request=request)
             msg = resp.get("messages")
-
+            #############################################################
             messages = resp["messages"]
             entities = resp["entities"]
+            #############################################################
+            if 'info' in messages:
+                st.info('\n  - '.join(messages['info']), icon='ℹ️')
+            if 'warning' in messages:
+                st.warning('\n  - '.join(messages['warning']), icon='⚠️')
+            if 'success' in messages:
+                st.success('\n  - '.join(messages['success']), icon='✅')
 
             if 'error' in messages:
                 raise Exception("\n\n".join(messages['error']))

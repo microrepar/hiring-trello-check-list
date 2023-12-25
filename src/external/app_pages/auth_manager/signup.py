@@ -55,7 +55,13 @@ def signup_page(authenticator, credentials, username):
     messages = resp.get('messages', [])
     entities = resp.get('entities', [])
     #############################################################
-    # st.write(entities)
+    if 'info' in messages:
+        st.info('\n  - '.join(messages['info']), icon='ℹ️')
+    if 'warning' in messages:
+        st.warning('\n  - '.join(messages['warning']), icon='⚠️')
+    if 'success' in messages:
+        st.success('\n  - '.join(messages['success']), icon='✅')
+    #############################################################
 
     if 'error' in messages:
         st.error('\n  -'.join(messages['error']), icon='🚨')
@@ -180,6 +186,13 @@ def signup_page(authenticator, credentials, username):
                     #############################################################
                     messages = resp['messages']
                     entities = resp['entities']
+                    #############################################################
+                    if 'info' in messages:
+                        st.info('\n  - '.join(messages['info']), icon='ℹ️')
+                    if 'warning' in messages:
+                        st.warning('\n  - '.join(messages['warning']), icon='⚠️')
+                    if 'success' in messages:
+                        st.success('\n  - '.join(messages['success']), icon='✅')
 
                     if 'error' in messages:
                         error_messages += messages['error']
@@ -255,7 +268,13 @@ def signup_page(authenticator, credentials, username):
                         #############################################################
                         messages = resp['messages']
                         entities = resp['entities']
-
+                        #############################################################
+                        if 'info' in messages:
+                            st.info('\n  - '.join(messages['info']), icon='ℹ️')
+                        if 'warning' in messages:
+                            st.warning('\n  - '.join(messages['warning']), icon='⚠️')
+                        if 'success' in messages:
+                            st.success('\n  - '.join(messages['success']), icon='✅')
                         if 'error' in messages:
                             error_messages += messages['error']
                         else:
@@ -315,11 +334,17 @@ def signup_page(authenticator, credentials, username):
         messages = resp['messages']
         entities = resp['entities']
         #############################################################
-
         if 'error' in messages:
-            st.error('\n\n'.join(messages['error']), icon='🚨')
-
-        elif entities:
+            st.error('\n  - '.join(messages['error']), icon='🚨')            
+        if 'info' in messages:
+            st.info('\n  - '.join(messages['info']), icon='ℹ️')
+        if 'warning' in messages:
+            st.warning('\n  - '.join(messages['warning']), icon='⚠️')
+        if 'success' in messages:
+            st.success('\n  - '.join(messages['success']), icon='✅')
+        #############################################################
+        
+        if entities:
             df = pd.concat([pd.DataFrame(u.data_to_dataframe()) for u in entities], ignore_index=True)
             placeholder_data_editor = st.empty()
 
@@ -385,6 +410,13 @@ def signup_page(authenticator, credentials, username):
                     #############################################################
                     messages = resp['messages']
                     entities = resp['entities']
+                    #############################################################
+                    if 'info' in messages:
+                        st.info('\n  - '.join(messages['info']), icon='ℹ️')
+                    if 'warning' in messages:
+                        st.warning('\n  - '.join(messages['warning']), icon='⚠️')
+                    if 'success' in messages:
+                        st.success('\n  - '.join(messages['success']), icon='✅')
 
                     if 'error' in messages:
                         error_messages += messages['error']

@@ -31,7 +31,7 @@ class UserGetAll(UseCase):
                 result.entities = user_list
             else:
                 result.entities = user_list
-                result.error_msg = 'There are no removed users in database.'
+                result.info_msg = 'There are no removed users in database.'
 
             return result
         except Exception as error:
