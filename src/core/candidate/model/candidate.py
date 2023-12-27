@@ -77,7 +77,7 @@ class Candidate(Entity):
             'office'           : 'cargo',
             'convocation_date' : 'convocacao',
             'deadline'         : 'prazo',
-            'notice'           : 'edital'
+            # 'notice'           : 'edital'
         }
 
         for attr in attr_map:
