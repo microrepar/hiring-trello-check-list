@@ -2,3 +2,4 @@
 pickle_data/
 redis_data/
 secrets.toml
+.venv/*

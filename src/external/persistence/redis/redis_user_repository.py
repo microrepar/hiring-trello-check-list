@@ -15,9 +15,16 @@ class RedisUserRepository(UserRepository):
         self.r = redis.Redis(
             host             = Config.REDIS_HOST,
             port             = Config.REDIS_PORT,
+            username         = Config.REDIS_USERNAME,
             password         = Config.REDIS_PASSWORD,
             decode_responses = True,
         )
+        # print('>>>>>>>>>',
+        #         Config.REDIS_HOST,
+        #         Config.REDIS_PORT,
+        #         Config.REDIS_USERNAME,
+        #         Config.REDIS_PASSWORD,
+        #       )
 
     def registry(self, entity: User) -> User:
         hash_main = entity.__class__.__name__

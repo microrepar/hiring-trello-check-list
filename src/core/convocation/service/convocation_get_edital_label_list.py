@@ -16,9 +16,9 @@ class ConvocationGetEditalLabelList(UseCase):
 
         try:
             json_response = self.repository.get_all_labels()
-
+            
             edital_dict = {}
-            for label_dict  in sorted(json_response, key=lambda x: x['name'].split('/')[-1]):
+            for label_dict  in sorted(json_response['labels'], key=lambda x: x['name'].split('/')[-1]):
                 if 'EDITAL' in label_dict.get('name', '').upper():
                     edital_dict.update(
                         {label_dict['name']: label_dict['id']}

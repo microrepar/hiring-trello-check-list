@@ -31,7 +31,7 @@ def date_due(str_date):
 class TrelloConvocationRepository(CandidateRepository):
 
     def __init__(self) -> None:
-        self.url = "https://api.trello.com/1/cards"
+        self.url_cards = "https://api.trello.com/1/cards"
 
         self.headers = headers = {
             "Accept": "application/json"
@@ -54,7 +54,8 @@ class TrelloConvocationRepository(CandidateRepository):
         # }
 
         self.id_list = "58984d5c14e5f235609476af"
-        self.id_card_source = "5e8799209416236e120b2c70"
+        self.id_card_label = "68a5f5ff0c50452c06ab8f50"
+        self.id_card_source = "5e8799209416236e120b2c70"  # primerio card template        
         self.id_board = '58984d438f2dc19d5daea3e7'
 
 
@@ -63,9 +64,9 @@ class TrelloConvocationRepository(CandidateRepository):
         querystring = {}
         querystring.update(self.querystring)
 
-        querystring['idList']         = "58984d5c14e5f235609476af",
-        querystring['idCardSource']   = "5e8799209416236e120b2c70",
-        querystring['keepFromSource'] = "all",
+        querystring['idList']         = self.id_list
+        querystring['idCardSource']   = self.id_card_source
+        querystring['keepFromSource'] = "all"
         querystring['name']           = ' - '.join([f'{entity.classification:0>3}', entity.office.upper(), entity.complete_name.upper()])
         querystring['desc']           = DESC_TEMPLATE.format(entity.enrollment.split('.')[-1],
                                                              entity.classification, 
@@ -73,7 +74,7 @@ class TrelloConvocationRepository(CandidateRepository):
                                                              entity.deadline.strftime('%d/%m/%Y'),
                                                              entity.department)
         
-        response = requests.request("POST", self.url, headers=self.headers, params=querystring)
+        response = requests.request("POST", self.url_cards, headers=self.headers, params=querystring)
         response.raise_for_status()
 
         json_response = response.json()
@@ -81,7 +82,7 @@ class TrelloConvocationRepository(CandidateRepository):
         return json_response
     
     def insert_label(self, entity: Candidate) -> Dict[str, Any]:
-        url_card = f'{self.url}/{entity.card_id}/idLabels'
+        url_card = f'{self.url_cards}/{entity.card_id}/idLabels'
 
         querystring = {}
         querystring.update(self.querystring)
@@ -96,7 +97,7 @@ class TrelloConvocationRepository(CandidateRepository):
         return json_response    
     
     def update(self, entity: Candidate) -> Candidate:
-        url_card = f"{self.url}/{entity.card_id}"
+        url_card = f"{self.url_cards}/{entity.card_id}"
 
         querystring = {}
         querystring.update(self.querystring)
@@ -111,7 +112,7 @@ class TrelloConvocationRepository(CandidateRepository):
         return json_response
     
     def remove(self, entity: Candidate) -> bool:
-        url_card = f"{self.url}/{entity.card_id}"
+        url_card = f"{self.url_cards}/{entity.card_id}"
 
         querystring = {}
         querystring.update(self.querystring)
@@ -122,7 +123,7 @@ class TrelloConvocationRepository(CandidateRepository):
         return response.text
     
     def get_all_labels(self) -> List[Dict[str, Any]]:
-        url = f"https://api.trello.com/1/boards/{self.id_board}/labels"
+        url = f"https://api.trello.com/1/cards/{self.id_card_label}"
 
         querystring  = self.querystring
 

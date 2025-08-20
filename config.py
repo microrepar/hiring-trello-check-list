@@ -22,6 +22,7 @@ class Config:
         REDIS_HOST         = st.secrets.get('REDIS_HOST')
         REDIS_PORT         = st.secrets.get('REDIS_PORT')
         REDIS_PASSWORD     = st.secrets.get('REDIS_PASSWORD')
+        REDIS_USERNAME     = os.getenv('REDIS_USERNAME')
 
         DB_FRAMEWORK = st.secrets.get('DB_FRAMEWORK')
         
@@ -41,6 +42,7 @@ class Config:
         REDIS_HOST         = os.getenv('REDIS_HOST')
         REDIS_PORT         = os.getenv('REDIS_PORT')
         REDIS_PASSWORD     = os.getenv('REDIS_PASSWORD')
+        REDIS_USERNAME     = os.getenv('REDIS_USERNAME')
 
         DB_FRAMEWORK = os.getenv('DB_FRAMEWORK')
 
