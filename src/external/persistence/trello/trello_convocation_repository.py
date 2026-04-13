@@ -53,7 +53,8 @@ class TrelloConvocationRepository(CandidateRepository):
         #     "ED.01/2019"   : "5d27499b87d0be7c5431310c"
         # }
 
-        self.id_list = "58984d5c14e5f235609476af"
+        # self.id_list = "58984d5c14e5f235609476af"
+        self.id_list = "64c3fb62698b3de62320945e"
         self.id_card_label = "68a5f5ff0c50452c06ab8f50"
         self.id_card_source = "5e8799209416236e120b2c70"  # primerio card template        
         self.id_board = '58984d438f2dc19d5daea3e7'
@@ -125,7 +126,8 @@ class TrelloConvocationRepository(CandidateRepository):
     def get_all_labels(self) -> List[Dict[str, Any]]:
         url = f"https://api.trello.com/1/cards/{self.id_card_label}"
 
-        querystring  = self.querystring
+        querystring = {}
+        querystring.update(self.querystring)
 
         response = requests.request(
             "GET",

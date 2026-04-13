@@ -44,8 +44,8 @@ class ConvocationCreateChecklist(UseCase):
             except Exception as error:
                 candidate_checklist_error_list.append(candidate)
                 result.warning_msg = (f'ConvocationCreateChecklistWarnning: '
-                                      f'ocorreu um erro ao inserir a label {candidate.enrollment} '
-                                      f'para o edital "{candidate.enrollment}" - {error}')
+                                      f'ocorreu um erro ao inserir a label {candidate.notice} '
+                                      f'para o card "{candidate.card_id}" - {error}')
                 self.repository.remove(candidate)
             else:
                 contador += 1                
