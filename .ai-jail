@@ -1,0 +1,14 @@
+# ai-jail sandbox configuration
+# https://github.com/akitaonrails/ai-jail
+# Edit freely. Regenerate with: ai-jail --clean --init
+
+command = [
+    "claude",
+    "--dangerously-skip-permissions",
+]
+rw_maps = [
+    "/home/codata/.zai/",
+    "/home/codata/.claude.json",
+]
+ro_maps = ["/mnt/wsl/docker-desktop/cli-tools"]
+no_docker = false

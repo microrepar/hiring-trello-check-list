@@ -1,10 +1,13 @@
 {
     "material-icon-theme.folders.associations": {
         "core": "rules",
+        "candidate": "Class",
+        "convocation": "Class",
         "adapters": "pipe",
         "external": "tools",
         "pages": "rules",
         "user": "admin",
+        "auth_manager": "admin",
         "notebook": "lib",
         "pagesection": "lib",
         "sentence": "lib",
@@ -12,6 +15,10 @@
         ".streamlit": "config",
         ".documentation": "resource",
         "persistence": "database",
+        "redis": "database",
+        "sqlalchemyorm": "database",
+        "pickle_data": "database",
+        "trello": "Api",
         "app_pages": "app"       
     },
     // "python.linting.enabled": true,
