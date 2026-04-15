@@ -57,7 +57,7 @@ def candidate_list_page(username, user_dict, placeholder_messages):
 
     with contextlib.suppress(FileExistsError):
         Path(f'pickle_data').mkdir()
-    
+
     with contextlib.suppress(FileExistsError):
         Path(f'pickle_data/{username}').mkdir()
 
@@ -70,25 +70,32 @@ def candidate_list_page(username, user_dict, placeholder_messages):
         df.to_pickle(candidates_file)
 
     col1, *cols = st.columns(5)
-    qtd_convocados = col1.number_input('Quantidade:', 
-                                       value=1, 
-                                       format='%d', 
-                                       on_change=on_click_flag_reset, 
+    qtd_convocados = col1.number_input('Quantidade:',
+                                       value=1,
+                                       format='%d',
+                                       on_change=on_click_flag_reset,
                                        min_value=1)
 
     df = pd.read_pickle(candidates_file)
 
     qtd_inseridos = df.shape[0]
-    if qtd_inseridos >= qtd_convocados:
-        qtd_convocados = 0
-    else:
-        qtd_convocados = qtd_convocados - qtd_inseridos
-        # Criando um DataFrame com linhas vazias
-        empty_df = pd.DataFrame([{} for _ in range(qtd_convocados)])
 
-        # Concatenando o DataFrame vazio ao DataFrame original
+    # Ajustar o DataFrame para ter exatamente a quantidade desejada
+    if qtd_inseridos > qtd_convocados:
+        # Se há mais registros do que a quantidade desejada, cortar o DataFrame
+        df = df.iloc[:qtd_convocados].copy()
+        df.to_pickle(candidates_file)
+        if qtd_inseridos > 0:  # Só mostrar mensagem se havia registros antes
+            st.info(f"📝 Quantidade reduzida de {qtd_inseridos} para {qtd_convocados} registros. Os registros excedentes foram removidos.")
+    elif qtd_inseridos < qtd_convocados:
+        # Se há menos registros, adicionar linhas vazias
+        qtd_adicionar = qtd_convocados - qtd_inseridos
+        empty_df = pd.DataFrame([{} for _ in range(qtd_adicionar)])
         df = pd.concat([df, empty_df], ignore_index=True)
         df.fillna('', inplace=True)
+        df = df.astype(dict(zip(candidate_columns, candidate_types)))
+        df.to_pickle(candidates_file)
+        st.info(f"➕ Adicionados {qtd_adicionar} registros em branco para completar a quantidade de {qtd_convocados}.")
 
     editor_config = {
         'nome': st.column_config.TextColumn('Nome Completo', required=True, default=''),
@@ -100,54 +107,57 @@ def candidate_list_page(username, user_dict, placeholder_messages):
         'edital': st.column_config.SelectboxColumn('Edital', options=label_list, required=True),
         'secretaria': st.column_config.TextColumn('Secretaria', required=True, default=''),
     }
-    
-    placeholder_data_editor = st.empty()
 
+    placeholder_data_editor = st.empty()
 
     if st.session_state.flag_reset:
         editor_key = 'update_data1'
-        edited_df = placeholder_data_editor.data_editor(df, 
-                                                    num_rows="dynamic", 
-                                                    column_config=editor_config,
-                                                    use_container_width=True,
-                                                    key=editor_key)                
+        form_key = 'candidate_form1'
     else:
         editor_key = 'update_data'
-        edited_df = placeholder_data_editor.data_editor(df, 
-                                                    num_rows="dynamic", 
-                                                    column_config=editor_config,
-                                                    use_container_width=True,
-                                                    key=editor_key)
+        form_key = 'candidate_form'
+
+    # Usar st.form para prevenir reruns automáticos do data_editor
+    with placeholder_data_editor.form(form_key):
+        edited_df = st.data_editor(df,
+                                   num_rows="dynamic",
+                                   column_config=editor_config,
+                                   use_container_width=True,
+                                   key=editor_key)
+        # Botão de submit - só rerun quando clicado
+        submitted = st.form_submit_button("Salvar Alterações", use_container_width=True)
         
 
-    if st.session_state[editor_key].get('added_rows'):
-        st.session_state.flag_reset = not st.session_state.flag_reset
+    # Salva automaticamente as alterações sem causar reload
+    # Processar apenas quando o formulário for submetido
+    if submitted:
+        # Salvar as alterações no arquivo
         edited_df.to_pickle(candidates_file)
-        st.session_state[editor_key]['added_rows'] = []
+
+        # Limpar os estados de edição
+        if st.session_state[editor_key].get('added_rows'):
+            st.session_state[editor_key]['added_rows'] = []
+        if st.session_state[editor_key].get('edited_rows'):
+            st.session_state[editor_key]['edited_rows'] = {}
+        if st.session_state[editor_key].get('deleted_rows'):
+            st.session_state[editor_key]['deleted_rows'] = []
+
+        st.success("✅ Alterações salvas com sucesso!")
         st.rerun()
 
-    if st.session_state[editor_key].get('edited_rows'):
-        st.session_state.flag_reset = not st.session_state.flag_reset
-        edited_df.to_pickle(candidates_file)
-        st.session_state[editor_key]['edited_rows'] = {}
-        st.rerun()
-    
-    if st.session_state[editor_key].get('deleted_rows'):
-        st.session_state.flag_reset = not st.session_state.flag_reset
-        edited_df.to_pickle(candidates_file)
-        st.session_state[editor_key]['deleted_rows'] = []
-        st.rerun()
 
-    
     # st.write(st.session_state[editor_key])
     # st.write(list(edited_df.T.to_dict().values()))
-    
+
     placeholder_btn_criar_checklist = st.empty()
-    
-    if not edited_df.empty:
+
+    # Recarregar do arquivo para garantir que estamos usando a versão mais recente salva
+    df_saved = pd.read_pickle(candidates_file)
+
+    if not df_saved.empty:
         if placeholder_btn_criar_checklist.button('Criar Checklist'):
 
-            df_copy = edited_df.copy()
+            df_copy = df_saved.copy()
             df_copy['edital'] = df_copy['edital'].replace(edital_dict)
             df_copy['convocacao'] = df_copy['convocacao'].astype(str)
             df_copy['prazo'] = df_copy['prazo'].astype(str)
