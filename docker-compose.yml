@@ -34,6 +34,4 @@ services:
 networks:
   api_network:
     driver: bridge
-    ipam:
-      config:
-        - subnet: ${DOCKER_SUBNET}
+
