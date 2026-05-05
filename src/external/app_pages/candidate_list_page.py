@@ -81,7 +81,7 @@ def candidate_list_page(username, user_dict, placeholder_messages):
 
     candidates_file = Path(f'pickle_data/{username}/candidates.pkl')
 
-    st.markdown('### LISTA DE CANDIDATOS')
+    st.markdown('### LISTA DE CANDIDATOS CONVOCADOS')
     if not candidates_file.exists():
         df = pd.DataFrame(columns=candidate_columns)
         df = df.astype(dict(zip(candidate_columns, candidate_types)))

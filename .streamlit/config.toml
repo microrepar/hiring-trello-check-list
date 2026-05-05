@@ -1,3 +1,9 @@
 [theme]
 base="dark"
 primaryColor="purple"
+
+[server]
+runOnSave = true
+fileWatcherType = "poll"
+liveSave = true
+headless = true
